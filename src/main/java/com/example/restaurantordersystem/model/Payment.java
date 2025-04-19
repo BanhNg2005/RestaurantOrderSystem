@@ -5,5 +5,4 @@ public class Payment {
     private PaymentStatus paymentStatus;
     private PaymentMethod paymentMethod;
     private Order order;
-
 }
