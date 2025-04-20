@@ -4,7 +4,7 @@ import java.util.List;
 
 public class User {
 
-    private Long userId;
+    private int userId;
     private String fullName;
     private String email;
     private String password;
@@ -22,13 +22,21 @@ public class User {
         this.role = role;
     }
 
+    public User(int userId, String username, String password, String email, String role) {
+        this.userId = userId;
+        this.fullName = username;
+        this.password = password;
+        this.email = email;
+        this.role = role;
+    }
+
     // Getters and Setters
 
-    public Long getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
