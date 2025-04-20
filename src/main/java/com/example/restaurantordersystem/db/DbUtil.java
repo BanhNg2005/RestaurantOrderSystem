@@ -35,6 +35,7 @@ public class DbUtil {
      * @param connection the connection to close
      */
     public static void closeQuietly(Connection connection) {
+
         if (connection != null) {
             try {
                 connection.close();
