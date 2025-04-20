@@ -14,11 +14,20 @@ public class SchemaInitializer {
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     user_id INT PRIMARY KEY AUTO_INCREMENT,
-                    username VARCHAR(50) UNIQUE NOT NULL,
-                    password_hash VARCHAR(255) NOT NULL,
-                    email VARCHAR(100) UNIQUE,
-                    role VARCHAR(20) NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    full_name VARCHAR(100) NOT NULL,
+                    email VARCHAR(100) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL,
+                    role VARCHAR(20) DEFAULT 'Customer' NOT NULL
+                )
+            """);
+
+            // Create tables table
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS tables (
+                    table_id INT PRIMARY KEY AUTO_INCREMENT,
+                    table_number INT UNIQUE NOT NULL,
+                    capacity INT NOT NULL,
+                    is_available BOOLEAN DEFAULT TRUE
                 )
             """);
 
@@ -29,28 +38,8 @@ public class SchemaInitializer {
                     name VARCHAR(100) NOT NULL,
                     description TEXT,
                     price DECIMAL(8,2) NOT NULL,
-                    category VARCHAR(50),
-                    image_path VARCHAR(255),
+                    category ENUM('DRINKS', 'APPETIZERS', 'MAIN_COURSE', 'DESSERTS') NOT NULL,
                     is_available BOOLEAN DEFAULT TRUE
-                )
-            """);
-
-            // Create categories table
-            stmt.execute("""
-                CREATE TABLE IF NOT EXISTS categories (
-                    category_id INT PRIMARY KEY AUTO_INCREMENT,
-                    name VARCHAR(50) UNIQUE NOT NULL,
-                    description TEXT
-                )
-            """);
-
-            // Create tables table
-            stmt.execute("""
-                CREATE TABLE IF NOT EXISTS tables (
-                    table_id INT PRIMARY KEY AUTO_INCREMENT,
-                    table_number INT UNIQUE NOT NULL,
-                    capacity INT NOT NULL,
-                    status VARCHAR(20) DEFAULT 'AVAILABLE'
                 )
             """);
 
@@ -58,40 +47,36 @@ public class SchemaInitializer {
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS orders (
                     order_id INT PRIMARY KEY AUTO_INCREMENT,
-                    user_id INT,
-                    table_id INT,
-                    status VARCHAR(20) NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES users(user_id),
-                    FOREIGN KEY (table_id) REFERENCES tables(table_id)
+                    table_number INT NOT NULL,
+                    status ENUM('PLACED', 'PREPARING', 'READY', 'SERVED', 'COMPLETED', 'CANCELLED') NOT NULL,
+                    order_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    completion_time TIMESTAMP NULL,
+                    is_paid BOOLEAN DEFAULT FALSE,
+                    total_amount DECIMAL(10,2) NOT NULL
                 )
             """);
 
             // Create order_items table
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS order_items (
-                    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
-                    order_id INT,
-                    item_id INT,
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    order_id INT NOT NULL,
+                    menu_item_id INT NOT NULL,
                     quantity INT NOT NULL,
-                    price DECIMAL(8,2) NOT NULL,
-                    notes TEXT,
                     FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
-                    FOREIGN KEY (item_id) REFERENCES menu_items(item_id)
+                    FOREIGN KEY (menu_item_id) REFERENCES menu_items(item_id)
                 )
             """);
 
             // Create payments table
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS payments (
-                    payment_id INT PRIMARY KEY AUTO_INCREMENT,
-                    order_id INT,
-                    amount DECIMAL(10,2) NOT NULL,
-                    payment_method VARCHAR(50) NOT NULL,
-                    status VARCHAR(20) DEFAULT 'PENDING',
-                    transaction_id VARCHAR(100),
-                    paid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    order_id INT NOT NULL,
+                    payment_status ENUM('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED', 'CANCELLED') NOT NULL,
+                    payment_method ENUM('CASH', 'CREDIT_CARD', 'DEBIT_CARD', 'GIFT_CARD', 'OTHER') NOT NULL,
+                    amount_paid DECIMAL(10,2) NOT NULL,
+                    payment_time TIMESTAMP NULL,
                     FOREIGN KEY (order_id) REFERENCES orders(order_id)
                 )
             """);
@@ -100,14 +85,10 @@ public class SchemaInitializer {
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS reservations (
                     reservation_id INT PRIMARY KEY AUTO_INCREMENT,
-                    user_id INT,
-                    table_id INT,
-                    party_size INT NOT NULL,
-                    reservation_date DATE NOT NULL,
-                    reservation_time TIME NOT NULL,
-                    status VARCHAR(20) DEFAULT 'CONFIRMED',
-                    notes TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    user_id INT NOT NULL,
+                    table_id INT NOT NULL,
+                    reservation_time TIMESTAMP NOT NULL,
+                    number_of_guests INT NOT NULL,
                     FOREIGN KEY (user_id) REFERENCES users(user_id),
                     FOREIGN KEY (table_id) REFERENCES tables(table_id)
                 )
@@ -129,52 +110,39 @@ public class SchemaInitializer {
             conn = DbUtil.getConnection();
             Statement stmt = conn.createStatement();
 
-            // Insert sample categories
+            // Insert sample users
             stmt.execute("""
-                INSERT INTO categories (name, description) VALUES
-                ('Appetizers', 'Starters and small plates'),
-                ('Main Courses', 'Hearty entrees and main dishes'),
-                ('Desserts', 'Sweet treats to finish your meal'),
-                ('Beverages', 'Drinks and refreshments'),
-                ('Specials', 'Chef''s special dishes of the day')
-                ON DUPLICATE KEY UPDATE name=name
-            """);
-
-            // Insert sample menu items
-            stmt.execute("""
-                INSERT INTO menu_items (name, description, price, category) VALUES
-                ('Garlic Bread', 'Toasted bread with garlic butter', 5.99, 'Appetizers'),
-                ('Caesar Salad', 'Fresh romaine lettuce with Caesar dressing', 8.99, 'Appetizers'),
-                ('Spaghetti Bolognese', 'Classic pasta with meat sauce', 14.99, 'Main Courses'),
-                ('Grilled Salmon', 'Fresh salmon with lemon butter sauce', 22.99, 'Main Courses'),
-                ('Chocolate Cake', 'Rich chocolate cake with ganache', 7.99, 'Desserts'),
-                ('Tiramisu', 'Classic Italian coffee-flavored dessert', 8.99, 'Desserts'),
-                ('Soda', 'Choice of cola, lemon-lime, or root beer', 2.99, 'Beverages'),
-                ('Chef''s Special Risotto', 'Creamy risotto with seasonal ingredients', 18.99, 'Specials')
-                ON DUPLICATE KEY UPDATE name=name
-            """);
+            MERGE INTO users (full_name, email, password, role) 
+            KEY(email) VALUES
+            ('Admin User', 'admin@restaurant.com', 'admin123', 'Admin'),
+            ('John Doe', 'john@example.com', 'password123', 'Customer'),
+            ('Jane Smith', 'jane@example.com', 'password123', 'Customer')
+        """);
 
             // Insert sample tables
             stmt.execute("""
-                INSERT INTO tables (table_number, capacity, status) VALUES
-                (1, 2, 'AVAILABLE'),
-                (2, 2, 'AVAILABLE'),
-                (3, 4, 'AVAILABLE'),
-                (4, 4, 'AVAILABLE'),
-                (5, 6, 'AVAILABLE'),
-                (6, 8, 'AVAILABLE')
-                ON DUPLICATE KEY UPDATE table_number=table_number
-            """);
+            MERGE INTO tables (table_number, capacity, is_available)
+            KEY(table_number) VALUES
+            (1, 2, true),
+            (2, 4, true),
+            (3, 6, true),
+            (4, 8, true),
+            (5, 2, true)
+        """);
 
-            // Insert admin user
+            // Insert sample menu items
             stmt.execute("""
-                INSERT INTO users (username, password_hash, email, role) VALUES
-                ('admin', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqaFS', 'admin@restaurant.com', 'ADMIN')
-                ON DUPLICATE KEY UPDATE username=username
-            """);
+            MERGE INTO menu_items (name, description, price, category, is_available)
+            KEY(name) VALUES
+            ('Espresso', 'Strong coffee shot', 2.99, 'DRINKS', true),
+            ('Caesar Salad', 'Fresh romaine lettuce with Caesar dressing', 8.99, 'APPETIZERS', true),
+            ('Chicken Alfredo', 'Fettuccine pasta with creamy sauce', 15.99, 'MAIN_COURSE', true),
+            ('Steak', 'Grilled ribeye with vegetables', 24.99, 'MAIN_COURSE', true),
+            ('Tiramisu', 'Coffee-flavored Italian dessert', 7.99, 'DESSERTS', true),
+            ('Cheesecake', 'New York style cheesecake', 6.99, 'DESSERTS', true)
+        """);
 
             System.out.println("Sample data inserted successfully.");
-
 
         } catch (SQLException e) {
             System.err.println("Error inserting sample data: " + e.getMessage());
@@ -182,5 +150,11 @@ public class SchemaInitializer {
         } finally {
             DbUtil.closeQuietly(conn);
         }
+    }
+
+    public static void main(String[] args) {
+        // Initialize schema and add sample data
+        initializeSchema();
+        insertSampleData();
     }
 }
