@@ -175,6 +175,7 @@ public class SchemaInitializer {
 
             System.out.println("Sample data inserted successfully.");
 
+
         } catch (SQLException e) {
             System.err.println("Error inserting sample data: " + e.getMessage());
             e.printStackTrace();
