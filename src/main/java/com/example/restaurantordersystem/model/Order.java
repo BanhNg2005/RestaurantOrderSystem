@@ -14,6 +14,7 @@ public class Order {
     private boolean isPaid;
     private double totalAmount;
 
+    public Order() {}
     public Order(int orderId, int tableNumber) {
         this.orderId = orderId;
         this.tableNumber = tableNumber;
@@ -57,10 +58,48 @@ public class Order {
         return totalAmount;
     }
 
+
+    //setters
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = new ArrayList<>(orderItems);
+    }
+
+    public void setTableNumber(int tableNumber) {
+        this.tableNumber = tableNumber;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public void setOrderTime(LocalDateTime orderTime) {
+        this.orderTime = orderTime;
+    }
+
+    public void setCompletionTime(LocalDateTime completionTime) {
+        this.completionTime = completionTime;
+    }
+
+    public void setPaid(boolean isPaid) {
+        this.isPaid = isPaid;
+    }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+
     public void addItem(OrderItem item) {
         orderItems.add(item);
         calculateTotal(); // recalculate total after adding an item
     }
+
+
 
     public void removeItem(int orderItemId) {
         orderItems.removeIf(item -> item.getId() == orderItemId);
