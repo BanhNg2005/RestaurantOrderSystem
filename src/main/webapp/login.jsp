@@ -71,7 +71,7 @@
 
         <label for="password">Password:</label>
         <input type="password" name="password" id="password" required>
-
+        <p>Don't have an account? <a href="signup">Register here</a></p>
         <input type="submit" value="Login">
     </form>
 </div>
