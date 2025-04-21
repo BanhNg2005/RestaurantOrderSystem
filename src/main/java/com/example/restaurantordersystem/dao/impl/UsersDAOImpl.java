@@ -118,4 +118,34 @@ public class UsersDAOImpl implements UsersDAO {
             DbUtil.closeQuietly(conn);
         }
     }
+    @Override
+    public User validateUser(String email, String password) {
+        Connection conn = null;
+        try {
+            conn = DbUtil.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT * FROM users WHERE email = ? AND password = ?"
+            );
+            stmt.setString(1, email);
+            stmt.setString(2, password); // For production, use hashed password comparison
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int userId = rs.getInt("user_id");
+                String fullName = rs.getString("full_name");
+                String role = rs.getString("role");
+
+                return new User(userId, fullName, password, email, role);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error validating user: " + e.getMessage());
+            return null;
+        } finally {
+            DbUtil.closeQuietly(conn);
+        }
+    }
+
 }
