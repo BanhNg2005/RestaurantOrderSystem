@@ -11,4 +11,6 @@ public interface UsersDAO {
     boolean saveUser(User user);
 
     boolean deleteUser(int id);
+
+    User validateUser(String email, String password);
 }
