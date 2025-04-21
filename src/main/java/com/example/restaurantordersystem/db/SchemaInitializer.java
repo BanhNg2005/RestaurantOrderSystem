@@ -9,7 +9,6 @@ public class SchemaInitializer {
         try {
             conn = DbUtil.getConnection();
             Statement stmt = conn.createStatement();
-
             // Create users table
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS users (
@@ -20,7 +19,6 @@ public class SchemaInitializer {
                     role VARCHAR(20) DEFAULT 'Customer' NOT NULL
                 )
             """);
-
             // Create tables table
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS tables (
@@ -82,6 +80,7 @@ public class SchemaInitializer {
             """);
 
             // Create reservations table
+
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS reservations (
                     reservation_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -151,9 +150,39 @@ public class SchemaInitializer {
             DbUtil.closeQuietly(conn);
         }
     }
+    public static void dropTables() {
+        Connection conn = null;
+        try {
+            conn = DbUtil.getConnection();
+            Statement stmt = conn.createStatement();
+
+            // Drop tables in reverse order due to foreign key constraints
+            System.out.println("Dropping existing tables...");
+
+            // First drop tables with foreign keys
+            stmt.execute("DROP TABLE IF EXISTS reservations");
+            stmt.execute("DROP TABLE IF EXISTS payments");
+            stmt.execute("DROP TABLE IF EXISTS order_items");
+
+            // Then drop tables referenced by foreign keys
+            stmt.execute("DROP TABLE IF EXISTS orders");
+            stmt.execute("DROP TABLE IF EXISTS menu_items");
+            stmt.execute("DROP TABLE IF EXISTS tables");
+            stmt.execute("DROP TABLE IF EXISTS users");
+
+            System.out.println("All tables dropped successfully.");
+
+        } catch (SQLException e) {
+            System.err.println("Error dropping tables: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            DbUtil.closeQuietly(conn);
+        }
+    }
 
     public static void main(String[] args) {
         // Initialize schema and add sample data
+        dropTables();
         initializeSchema();
         insertSampleData();
     }
