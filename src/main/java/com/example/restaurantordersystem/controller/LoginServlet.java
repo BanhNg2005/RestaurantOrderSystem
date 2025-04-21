@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -39,6 +40,10 @@ public class LoginServlet extends HttpServlet {
         } else {
             // Login failed
             request.setAttribute("error", "Invalid email or password");
+            List<User> users = userDAO.findAllUsers();
+            for (User user : users) {
+                System.out.println("User: " + user.getEmail() + " | " + user.getPassword());
+            }
             request.getRequestDispatcher("/login.jsp").forward(request, response);
         }
     }
