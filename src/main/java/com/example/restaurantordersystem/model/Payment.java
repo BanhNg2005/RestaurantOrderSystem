@@ -130,6 +130,33 @@ public class Payment {
         return paymentTime;
     }
 
+
+    //Setters
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public void setAmountPaid(double amountPaid) {
+        this.amountPaid = amountPaid;
+    }
+
+    public void setPaymentTime(LocalDateTime paymentTime) {
+        this.paymentTime = paymentTime;
+    }
+
+
     @Override
     public String toString() {
         return "Payment{" +

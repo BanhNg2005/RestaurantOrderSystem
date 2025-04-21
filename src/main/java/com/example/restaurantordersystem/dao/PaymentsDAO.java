@@ -5,7 +5,7 @@ import com.example.restaurantordersystem.model.Payment;
 import java.util.List;
 
 public interface PaymentsDAO {
-    Payment findPaymentByID(long paymentID);
+    Payment findPaymentByID(int paymentID);
 
     List<Payment> findAllPayments();
 
