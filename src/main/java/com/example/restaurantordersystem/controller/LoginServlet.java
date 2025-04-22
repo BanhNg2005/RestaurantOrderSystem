@@ -35,7 +35,15 @@ public class LoginServlet extends HttpServlet {
             // Login successful
             HttpSession session = request.getSession();
             session.setAttribute("user", tempUser);
-            response.sendRedirect("home.jsp"); // or wherever you want to go after login
+
+            // Check user role and redirect accordingly
+            if ("Admin".equals(tempUser.getRole())) {
+                // Admin user - redirect to admin dashboard
+                response.sendRedirect(request.getContextPath() + "/admin/home");
+            } else {
+                // Regular user - redirect to client home
+                response.sendRedirect("client_home.jsp");
+            }
         } else {
             // Login failed
             request.setAttribute("error", "Invalid email or password");
