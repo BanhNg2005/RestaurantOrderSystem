@@ -37,13 +37,19 @@ public class TablesDAOImpl implements TablesDAO {
 
     @Override
     public List<Table> findAllTables() {
+        System.out.println("DEBUG: Entering findAllTables()");
         List<Table> tables = new ArrayList<>();
         Connection conn = null;
 
         try {
             conn = DbUtil.getConnection();
+            System.out.println("DEBUG: Connection established: " + (conn != null));
+
             Statement stmt = conn.createStatement();
+            System.out.println("DEBUG: Executing query: SELECT * FROM tables");
+
             ResultSet rs = stmt.executeQuery("SELECT * FROM tables");
+            System.out.println("DEBUG: Query executed, processing results...");
 
             while (rs.next()) {
                 long tableId = rs.getLong("table_id");
@@ -51,16 +57,20 @@ public class TablesDAOImpl implements TablesDAO {
                 int capacity = rs.getInt("capacity");
                 boolean isAvailable = rs.getBoolean("is_available");
 
+                System.out.printf("DEBUG: Found table - ID: %d, Number: %d, Capacity: %d, Available: %b%n",
+                        tableId, tableNumber, capacity, isAvailable);
+
                 Table table = new Table(tableNumber, capacity, isAvailable);
                 table.setTableId(tableId);
                 tables.add(table);
             }
+            System.out.println("DEBUG: Total tables found: " + tables.size());
         } catch (SQLException e) {
-            System.err.println("Error retrieving all tables: " + e.getMessage());
+            System.err.println("ERROR in findAllTables(): " + e.getMessage());
+            e.printStackTrace();
         } finally {
             DbUtil.closeQuietly(conn);
         }
-
         return tables;
     }
 

@@ -13,4 +13,5 @@ public interface ReservationsDAO {
     boolean saveReservation(Reservation reservation);
     boolean deleteReservation(long reservationId);
     List<Reservation> findReservationsByTime(LocalDateTime from, LocalDateTime to);
+
 }
