@@ -61,7 +61,6 @@
             color: #fff;
         }
 
-        /* Main Content Area */
         .content {
             padding: 40px 20px;
             text-align: center;
@@ -69,7 +68,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
             margin: 20px auto;
-            max-width: 800px;
+            max-width: 1000px;
         }
 
         h1 {
@@ -83,7 +82,69 @@
             color: #666;
             margin-bottom: 30px;
         }
+        .welcome-box {
+            position: relative;
+            background-image: url('images/homepage.jpeg');
+            background-size: cover;
+            background-position: center;
+            width: 100%;
+            height: 700px;
+            border-radius: 20px;
+            overflow: hidden; /* important for overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
 
+        .welcome-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .welcome-box h1,
+        .welcome-box p,
+        .welcome-box .btn-menu {
+            position: relative;
+            z-index: 2;
+            color: white;
+            text-align: center;
+        }
+
+        .welcome-box h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .welcome-box p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 80%;
+        }
+
+        .welcome-box .btn-menu {
+            background-color: #e44d26;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .welcome-box .btn-menu:hover {
+            background-color: #c73a1d;
+
+        }
         /* Footer */
         footer {
             background-color: #333;
@@ -102,16 +163,19 @@
     <a href="${pageContext.request.contextPath}/home">MonAmour</a>
     <ul>
         <li><a href="about.jsp">About</a></li>
-        <a href="${pageContext.request.contextPath}/reservations">Reservation</a>
-        <li><a href="menu.jsp">Menu</a></li>
+        <li><a href="${pageContext.request.contextPath}/reservations">Reservation</a></li>
+        <li><a href="${pageContext.request.contextPath}/menu">Menu</a></li>
         <li><a href="order.jsp">Order</a></li>
         <li><a href="payment.jsp">Payment</a></li>
         <li><a href="login.jsp">Logout</a></li>
     </ul>
 </nav>
 <div class="content">
-    <h1>Welcome to MonAmour Restaurant</h1>
-    <p>Experience the finest dining with exquisite dishes and a romantic ambiance.</p>
+    <div class="welcome-box">
+        <h1>Welcome to MonAmour Restaurant</h1>
+        <p>Experience the finest dining with exquisite dishes and a romantic ambiance.</p>
+        <a href="${pageContext.request.contextPath}/menu" class="btn-menu">View Menu</a>
+    </div>
 </div>
 <footer>
     <p>&copy; 2024 MonAmour</p>

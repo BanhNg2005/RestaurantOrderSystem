@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/reservations")
@@ -89,8 +90,15 @@ public class ReservationServlet extends HttpServlet {
         List<Reservation> reservations = reservationsDAO.findReservationsByUserId(user.getUserId());
         List<Table> tables = tablesDAO.findAllTables();
 
+        List<Table> availableTables = new ArrayList<>();
+        for (Table table : tables) {
+            if (table.isAvailable()) {
+                availableTables.add(table);
+            }
+        }
+
         request.setAttribute("reservations", reservations);
-        request.setAttribute("tables", tables);
+        request.setAttribute("tables", availableTables);
 
         request.getRequestDispatcher("/reservation.jsp").forward(request, response);
     }
@@ -137,7 +145,13 @@ public class ReservationServlet extends HttpServlet {
     private void showNewForm(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException {
         List<Table> tables = tablesDAO.findAllTables();
-        request.setAttribute("tables", tables);
+        List<Table> availableTables = new ArrayList<>();
+        for (Table table : tables) {
+            if (table.isAvailable()) {
+                availableTables.add(table);
+            }
+        }
+        request.setAttribute("tables", availableTables);
         request.getRequestDispatcher("/reservation.jsp").forward(request, response);
     }
 
