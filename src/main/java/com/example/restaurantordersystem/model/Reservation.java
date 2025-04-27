@@ -1,6 +1,8 @@
 package com.example.restaurantordersystem.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 public class Reservation {
     private Long reservationId;
@@ -60,6 +62,10 @@ public class Reservation {
 
     public void setTable(Table table) {
         this.table = table;
+    }
+    public Date getReservationTimeAsDate() {
+        if (reservationTime == null) return null;
+        return Date.from(reservationTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
 

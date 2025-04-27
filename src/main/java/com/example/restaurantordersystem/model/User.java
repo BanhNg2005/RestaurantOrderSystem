@@ -84,8 +84,9 @@ public class User {
         return reservations;
     }
 
-
     public void setReservations(List<Reservation> reservations) {
         this.reservations = reservations;
     }
+
+    public boolean isAdmin(){ return this.role == "admin";}
 }

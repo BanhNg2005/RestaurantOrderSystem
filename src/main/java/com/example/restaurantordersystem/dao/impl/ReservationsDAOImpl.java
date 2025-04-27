@@ -5,6 +5,8 @@ import com.example.restaurantordersystem.db.DbUtil;
 import com.example.restaurantordersystem.model.Reservation;
 import com.example.restaurantordersystem.model.Table;
 import com.example.restaurantordersystem.model.User;
+import com.example.restaurantordersystem.dao.TablesDAO;
+import com.example.restaurantordersystem.dao.UsersDAO;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,19 +15,65 @@ import java.util.List;
 
 public class ReservationsDAOImpl implements ReservationsDAO {
 
-    @Override
-    public Reservation findReservationByID(long reservationId) {
-        String sql = "SELECT * FROM reservations WHERE reservation_id = ?";
-        try (Connection conn = DbUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, reservationId);
-            ResultSet rs = stmt.executeQuery();
+    private final TablesDAO tablesDAO = new TablesDAOImpl();
+    private final UsersDAO usersDAO = new UsersDAOImpl();
 
-            if (rs.next()) {
-                return extractReservationFromResultSet(rs);
+    @Override
+    public boolean saveReservation(Reservation reservation) {
+        String sql;
+        boolean isNew = (reservation.getReservationId() == null);
+
+        if (isNew) {
+            sql = "INSERT INTO reservations (reservation_time, number_of_guests, user_id, table_id) VALUES (?, ?, ?, ?)";
+        } else {
+            sql = "UPDATE reservations SET reservation_time = ?, number_of_guests = ?, user_id = ?, table_id = ? WHERE reservation_id = ?";
+        }
+
+        try (Connection conn = DbUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setTimestamp(1, Timestamp.valueOf(reservation.getReservationTime()));
+            pstmt.setInt(2, reservation.getNumberOfGuests());
+            pstmt.setLong(3, reservation.getUser().getUserId());
+            pstmt.setLong(4, reservation.getTable().getTableId());
+
+            if (!isNew) {
+                pstmt.setLong(5, reservation.getReservationId());
+            }
+
+            int affectedRows = pstmt.executeUpdate();
+
+            if (isNew && affectedRows > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        reservation.setReservationId(generatedKeys.getLong(1));
+                    }
+                }
+            }
+
+            return affectedRows > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public Reservation findReservationByID(long reservationId){
+        String sql = "SELECT * FROM reservations WHERE reservation_id = ?";
+
+        try (Connection conn = DbUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setLong(1, reservationId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return extractReservationFromResultSet(rs);
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching reservation: " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -48,19 +96,21 @@ public class ReservationsDAOImpl implements ReservationsDAO {
     }
 
     @Override
-    public List<Reservation> findReservationsByUserId(int userId) {
+    public List<Reservation> findReservationsByUserId(int userId){
         List<Reservation> reservations = new ArrayList<>();
-        String sql = "SELECT * FROM reservations WHERE user_id = ?";
-        try (Connection conn = DbUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
+        String sql = "SELECT * FROM reservations WHERE user_id = ? ORDER BY reservation_time DESC";
 
-            while (rs.next()) {
-                reservations.add(extractReservationFromResultSet(rs));
+        try (Connection conn = DbUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setLong(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    reservations.add(extractReservationFromResultSet(rs));
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching reservations by user: " + e.getMessage());
+            e.printStackTrace();
         }
         return reservations;
     }
@@ -84,54 +134,20 @@ public class ReservationsDAOImpl implements ReservationsDAO {
     }
 
     @Override
-    public boolean saveReservation(Reservation reservation) {
-        String checkSql = "SELECT COUNT(*) FROM reservations WHERE reservation_id = ?";
-        String insertSql = "INSERT INTO reservations (user_id, table_id, reservation_time, number_of_guests) VALUES (?, ?, ?, ?)";
-        String updateSql = "UPDATE reservations SET user_id = ?, table_id = ?, reservation_time = ?, number_of_guests = ? WHERE reservation_id = ?";
-        try (Connection conn = DbUtil.getConnection()) {
-            PreparedStatement checkStmt = conn.prepareStatement(checkSql);
-            checkStmt.setLong(1, reservation.getReservationId());
-            ResultSet rs = checkStmt.executeQuery();
-            rs.next();
-            int count = rs.getInt(1);
-
-            PreparedStatement stmt;
-            if (count == 0) {
-                stmt = conn.prepareStatement(insertSql);
-                stmt.setInt(1, reservation.getUser().getUserId());
-                stmt.setLong(2, reservation.getTable().getTableId());
-                stmt.setTimestamp(3, Timestamp.valueOf(reservation.getReservationTime()));
-                stmt.setInt(4, reservation.getNumberOfGuests());
-            } else {
-                stmt = conn.prepareStatement(updateSql);
-                stmt.setInt(1, reservation.getUser().getUserId());
-                stmt.setLong(2, reservation.getTable().getTableId());
-                stmt.setTimestamp(3, Timestamp.valueOf(reservation.getReservationTime()));
-                stmt.setInt(4, reservation.getNumberOfGuests());
-                stmt.setLong(5, reservation.getReservationId());
-            }
-
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Error saving reservation: " + e.getMessage());
-            return false;
-        }
-    }
-
-    @Override
     public boolean deleteReservation(long reservationId) {
         String sql = "DELETE FROM reservations WHERE reservation_id = ?";
+
         try (Connection conn = DbUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, reservationId);
-            return stmt.executeUpdate() > 0;
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setLong(1, reservationId);
+
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error deleting reservation: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
-
     @Override
     public List<Reservation> findReservationsByTime(LocalDateTime from, LocalDateTime to) {
         List<Reservation> reservations = new ArrayList<>();
@@ -153,13 +169,21 @@ public class ReservationsDAOImpl implements ReservationsDAO {
 
     private Reservation extractReservationFromResultSet(ResultSet rs) throws SQLException {
         Reservation reservation = new Reservation();
+
         reservation.setReservationId(rs.getLong("reservation_id"));
-        reservation.setReservationTime(rs.getTimestamp("reservation_time").toLocalDateTime());
+
+        Timestamp timestamp = rs.getTimestamp("reservation_time");
+        if (timestamp != null) {
+            reservation.setReservationTime(timestamp.toLocalDateTime());
+        }
+
         reservation.setNumberOfGuests(rs.getInt("number_of_guests"));
-        UsersDAOImpl user = new UsersDAOImpl();
-        TablesDAOImpl table = new TablesDAOImpl();
-        reservation.setUser(user.findUserByID(rs.getInt("user_id")));
-        reservation.setTable( table.findTableByID(rs.getLong("table_id")));
+
+        User user = usersDAO.findUserByID(rs.getInt("user_id"));
+        reservation.setUser(user);
+
+        Table table = tablesDAO.findTableByID(rs.getLong("table_id"));
+        reservation.setTable(table);
 
         return reservation;
     }
