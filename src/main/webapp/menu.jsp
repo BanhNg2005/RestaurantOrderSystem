@@ -155,8 +155,7 @@
         <li><a href="${pageContext.request.contextPath}/reservations">Reservation</a></li>
         <li><a href="${pageContext.request.contextPath}/menu">Menu</a></li>
         <li><a href="order.jsp">Order</a></li>
-        <li><a href="payment.jsp">Payment</a></li>
-        <li><a href="login.jsp">Logout</a></li>
+        <li><a href="${pageContext.request.contextPath}/login">Logout</a></li>
     </ul>
 </nav>
 

@@ -151,9 +151,7 @@
             color: #fff;
             text-align: center;
             padding: 20px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            margin-top: 40px;
             font-size: 14px;
         }
     </style>
@@ -166,8 +164,7 @@
         <li><a href="${pageContext.request.contextPath}/reservations">Reservation</a></li>
         <li><a href="${pageContext.request.contextPath}/menu">Menu</a></li>
         <li><a href="order.jsp">Order</a></li>
-        <li><a href="payment.jsp">Payment</a></li>
-        <li><a href="login.jsp">Logout</a></li>
+        <li><a href="${pageContext.request.contextPath}/login">Logout</a></li>
     </ul>
 </nav>
 <div class="content">
@@ -178,7 +175,7 @@
     </div>
 </div>
 <footer>
-    <p>&copy; 2024 MonAmour</p>
+    <p>&copy; 2024 MonAmour Restaurant. All rights reserved.</p>
 </footer>
 </body>
 </html>
