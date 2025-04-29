@@ -19,6 +19,13 @@ public class Table {
         this.isAvailable = isAvailable;
     }
 
+    public Table(Long tableId, int tableNumber, int capacity, boolean isAvailable) {
+        this.tableId = tableId;
+        this.tableNumber = tableNumber;
+        this.capacity = capacity;
+        this.isAvailable = isAvailable;
+    }
+
     // Getters and Setters
     public Long getTableId() {
         return tableId;

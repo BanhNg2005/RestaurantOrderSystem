@@ -130,4 +130,28 @@ public class TablesDAOImpl implements TablesDAO {
             DbUtil.closeQuietly(conn);
         }
     }
+
+    @Override
+    public List<Table> findAvailableTables() {
+        List<Table> tables = new ArrayList<>();
+        Connection conn = null;
+        try {
+            conn = DbUtil.getConnection();
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM tables WHERE is_available = TRUE");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                tables.add(new Table(
+                        rs.getLong("table_id"),
+                        rs.getInt("table_number"),
+                        rs.getInt("capacity"),
+                        rs.getBoolean("is_available")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching available tables: " + e.getMessage());
+        } finally {
+            DbUtil.closeQuietly(conn);
+        }
+        return tables;
+    }
 }

@@ -11,4 +11,6 @@ public interface TablesDAO {
     boolean saveTable(Table table);
 
     boolean deleteTable(int id);
+
+    List<Table> findAvailableTables();
 }

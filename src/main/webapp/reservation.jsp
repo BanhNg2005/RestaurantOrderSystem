@@ -1,6 +1,3 @@
-
-
-
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -31,7 +28,7 @@
         }
 
         nav a {
-            color: #e44d26; /* MonAmour brand color */
+            color: #e44d26;
             text-decoration: none;
             font-size: 22px;
             font-weight: bold;
@@ -222,7 +219,6 @@
             font-size: 14px;
         }
 
-        /* Add some bottom padding to body to prevent content from being hidden by footer */
         body {
             padding-bottom: 60px;
         }
@@ -247,7 +243,7 @@
         <li><a href="about.jsp">About</a></li>
         <li><a href="${pageContext.request.contextPath}/reservations">Reservation</a></li>
         <li><a href="${pageContext.request.contextPath}/menu">Menu</a></li>
-        <li><a href="order.jsp">Order</a></li>
+        <li><a href="${pageContext.request.contextPath}/order">Order</a></li>
         <li><a href="${pageContext.request.contextPath}/login">Logout</a></li>
     </ul>
 </nav>
@@ -391,7 +387,7 @@
 </div>
 
 <footer>
-    &copy; 2024 MonAmour Restaurant. All Rights Reserved.
+    &copy; 2025 MonAmour Restaurant. All Rights Reserved.
 </footer>
 
 <script>

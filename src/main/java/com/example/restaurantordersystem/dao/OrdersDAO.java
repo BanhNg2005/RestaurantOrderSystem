@@ -8,4 +8,5 @@ public interface OrdersDAO {
     List<Order> findAll();
     boolean save(Order order);
     boolean delete(int orderId);
+    boolean update(Order order);
 }
