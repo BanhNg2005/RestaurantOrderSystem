@@ -8,6 +8,7 @@ import com.example.restaurantordersystem.model.Reservation;
 import com.example.restaurantordersystem.model.Table;
 import com.example.restaurantordersystem.model.User;
 
+import jakarta.ejb.Local;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -163,6 +164,7 @@ public class ReservationServlet extends HttpServlet {
             int numberOfGuests = Integer.parseInt(request.getParameter("numberOfGuests"));
 
             Table table = tablesDAO.findTableByID(tableId);
+            LocalDateTime currentDate = LocalDateTime.now();
             if (table != null) {
                 if (!table.isAvailable()) {
                     request.setAttribute("message", "Selected table is not available.");
@@ -177,6 +179,12 @@ public class ReservationServlet extends HttpServlet {
                 }
 
                 LocalDateTime reservationTime = LocalDateTime.parse(reservationTimeStr, DATE_TIME_FORMATTER);
+
+                if (reservationTime.isBefore(currentDate)){
+                    request.setAttribute("message", "Date cannot be before "+ currentDate.format(DATE_TIME_FORMATTER));
+                    listUserReservations(request, response, user);
+                    return;
+                }
                 Reservation reservation = new Reservation(reservationTime, numberOfGuests, user, table);
 
                 if (reservationsDAO.saveReservation(reservation)) {
@@ -197,6 +205,7 @@ public class ReservationServlet extends HttpServlet {
         try {
             long id = Long.parseLong(request.getParameter("id"));
             Reservation reservation = reservationsDAO.findReservationByID(id);
+            LocalDateTime currentDate = LocalDateTime.now();
 
             if (reservation != null && reservation.getUser().getUserId() == user.getUserId()) {
                 long tableId = Long.parseLong(request.getParameter("tableId"));
@@ -207,6 +216,11 @@ public class ReservationServlet extends HttpServlet {
                 Table table = tablesDAO.findTableByID(tableId);
                 if (table.getCapacity() < numberOfGuests) {
                     request.setAttribute("message", "Selected table does not have enough seats for your guests.");
+                    listUserReservations(request, response, user);
+                    return;
+                }
+                if (reservationTime.isBefore(currentDate)){
+                    request.setAttribute("message", "Date cannot be before "+ currentDate.format(DATE_TIME_FORMATTER));
                     listUserReservations(request, response, user);
                     return;
                 }
