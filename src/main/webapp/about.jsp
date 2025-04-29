@@ -105,9 +105,8 @@
         <li><a href="about.jsp">About</a></li>
         <li><a href="${pageContext.request.contextPath}/reservations">Reservation</a></li>
         <li><a href="${pageContext.request.contextPath}/menu">Menu</a></li>
-        <li><a href="order.jsp">Order</a></li>
-        <li><a href="payment.jsp">Payment</a></li>
-        <li><a href="login.jsp">Logout</a></li>
+        <li><a href="${pageContext.request.contextPath}/order">Order</a></li>
+        <li><a href="${pageContext.request.contextPath}/login">Logout</a></li>
     </ul>
 </nav>
 <div class="about">
@@ -122,7 +121,7 @@
         We look forward to serving you!</p>
 </div>
 <footer>
-    <p>&copy; 2024 MonAmour Restaurant. All rights reserved.</p>
+    <p>&copy; 2025 MonAmour Restaurant. All rights reserved.</p>
 </footer>
 </body>
 </html>

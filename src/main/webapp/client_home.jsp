@@ -79,7 +79,7 @@
 
         p {
             font-size: 18px;
-            color: #666;
+            color: #ffffff;
             margin-bottom: 30px;
         }
         .welcome-box {
@@ -163,7 +163,7 @@
         <li><a href="about.jsp">About</a></li>
         <li><a href="${pageContext.request.contextPath}/reservations">Reservation</a></li>
         <li><a href="${pageContext.request.contextPath}/menu">Menu</a></li>
-        <li><a href="order.jsp">Order</a></li>
+        <li><a href="${pageContext.request.contextPath}/order">Order</a></li>
         <li><a href="${pageContext.request.contextPath}/login">Logout</a></li>
     </ul>
 </nav>
@@ -175,7 +175,7 @@
     </div>
 </div>
 <footer>
-    <p>&copy; 2024 MonAmour Restaurant. All rights reserved.</p>
+    <p>&copy; 2025 MonAmour Restaurant. All rights reserved.</p>
 </footer>
 </body>
 </html>

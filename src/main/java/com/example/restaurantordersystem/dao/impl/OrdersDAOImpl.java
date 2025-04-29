@@ -154,4 +154,33 @@ public class OrdersDAOImpl implements OrdersDAO {
             DbUtil.closeQuietly(conn);
         }
     }
+
+    @Override
+    public boolean update(Order order) {
+        try (Connection conn = DbUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                     "UPDATE orders SET status = ?, completion_time = ?, is_paid = ?, total_amount = ? WHERE order_id = ?")) {
+
+            stmt.setString(1, order.getStatus().toString());
+
+            if (order.getCompletionTime() != null) {
+                stmt.setTimestamp(2, Timestamp.valueOf(order.getCompletionTime()));
+            } else {
+                stmt.setNull(2, Types.TIMESTAMP);
+            }
+
+            stmt.setBoolean(3, order.isPaid());
+            stmt.setDouble(4, order.getTotalAmount());
+            stmt.setInt(5, order.getOrderId());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating order: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
